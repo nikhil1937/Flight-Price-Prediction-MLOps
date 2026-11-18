@@ -1,0 +1,42 @@
+# Runs the Flight Prediction API container in Kubernetes.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flight-api-deployment
+  namespace: flight-api
+  labels:
+    app: flight-api
+spec:
+  # Start with one replica; increase later if needed.
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: flight-api
+
+  template:
+    metadata:
+      labels:
+        app: flight-api
+    spec:
+      containers:
+        - name: flight-api
+          # Uses the Flight API image stored in Azure Container Registry.
+          # Keep the repository name and tag aligned with the image in ACR.
+          image: flightapiregistry1233.azurecr.io/flight-api-imagee:v1
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: http
+              # app.py starts Flask on 0.0.0.0:5007; Dockerfile exposes 5007.
+              containerPort: 5007
+              protocol: TCP
+
+          # Initial resource requests/limits; adjust after measuring actual usage.
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"

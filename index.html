@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Price Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+            font-size: 14px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            display: none;
+        }
+        .error {
+            background-color: #f8d7da !important;
+            color: #721c24 !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Flight Price Predictor</h2>
+    <form id="predictionForm">
+        <div class="form-group">
+            <label for="distance">Distance:</label>
+            <input type="number" id="distance" value="1500" required>
+        </div>
+        <div class="form-group">
+            <label for="time">Time (Hours):</label>
+            <input type="number" id="time" value="3" step="0.1" required>
+        </div>
+        <div class="form-group">
+            <label for="year">Year:</label>
+            <input type="number" id="year" value="2026" required>
+        </div>
+        <div class="form-group">
+            <label for="month">Month:</label>
+            <input type="number" id="month" value="10" min="1" max="12" required>
+        </div>
+        <div class="form-group">
+            <label for="day">Day:</label>
+            <input type="number" id="day" value="15" min="1" max="31" required>
+        </div>
+        <div class="form-group">
+            <label for="day_of_week">Day of Week (0-6):</label>
+            <input type="number" id="day_of_week" value="2" min="0" max="6" required>
+        </div>
+        <div class="form-group">
+            <label for="from">From City:</label>
+            <input type="text" id="from" value="Delhi" required>
+        </div>
+        <div class="form-group">
+            <label for="to">To City:</label>
+            <input type="text" id="to" value="Mumbai" required>
+        </div>
+        <div class="form-group">
+            <label for="flightType">Flight Type / Class:</label>
+            <input type="text" id="flightType" value="Economy" required>
+        </div>
+        <div class="form-group">
+            <label for="agency">Agency / Airline:</label>
+            <input type="text" id="agency" value="Air India" required>
+        </div>
+
+        <button type="submit">Predict Price</button>
+    </form>
+
+    <div id="result"></div>
+</div>
+
+<script>
+    document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const resultDiv = document.getElementById('result');
+        resultDiv.style.display = 'block';
+        resultDiv.className = '';
+        resultDiv.innerText = 'Calculating prediction...';
+
+        // Gather input data matching your model's required columns
+        const payload = {
+            distance: parseFloat(document.getElementById('distance').value),
+            time: parseFloat(document.getElementById('time').value),
+            year: parseInt(document.getElementById('year').value),
+            month: parseInt(document.getElementById('month').value),
+            day: parseInt(document.getElementById('day').value),
+            day_of_week: parseInt(document.getElementById('day_of_week').value),
+            from: document.getElementById('from').value,
+            to: document.getElementById('to').value,
+            flightType: document.getElementById('flightType').value,
+            agency: document.getElementById('agency').value
+        };
+
+        try {
+            const response = await fetch('http://localhost:5007/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                resultDiv.innerText = `Estimated Price: ₹${data.predicted_price}`;
+            } else {
+                resultDiv.className = 'error';
+                resultDiv.innerText = `Error: ${data.error || 'Unknown error occurred'}`;
+            }
+        } catch (error) {
+            resultDiv.className = 'error';
+            resultDiv.innerText = 'Failed to connect to Docker API. Ensure the container is running on port 5007.';
+            console.error('Error:', error);
+        }
+    });
+</script>
+
+</body>
+</html>

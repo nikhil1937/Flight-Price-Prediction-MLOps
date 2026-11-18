@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: flight-api-service
+  namespace: flight-api
+
+spec:
+  type: LoadBalancer
+
+  selector:
+    app: flight-api
+
+  ports:
+    - name: http
+      protocol: TCP
+      # External access through port 80.
+      port: 80
+      # Forward traffic to Flask inside the container.
+      targetPort: 5007
