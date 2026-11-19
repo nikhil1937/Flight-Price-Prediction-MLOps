@@ -20,16 +20,23 @@ pipeline {
                 echo 'Verifying project files'
 
                 script {
-                    if (!fileExists('requirements.txt')) {
-                        error 'requirements.txt not found!'
-                    }
+                    def requiredFiles = [
+                        'requirements.txt',
+                        'app.py',
+                        'test_model.py',
+                        'test_data.csv',
+                        'flight_price_model.keras',
+                        'preprocessor.pkl'
+                    ]
 
-                    if (!fileExists('app.py')) {
-                        error 'app.py not found!'
+                    for (file in requiredFiles) {
+                        if (!fileExists(file)) {
+                            error "${file} not found!"
+                        }
                     }
                 }
 
-                echo 'Project files verified successfully'
+                echo 'All required project files verified'
             }
         }
 
@@ -48,6 +55,14 @@ pipeline {
                 bat '.venv\\Scripts\\python -m pip install --upgrade pip'
 
                 bat '.venv\\Scripts\\python -m pip install -r requirements.txt'
+            }
+        }
+
+        stage('Automated Model Testing') {
+            steps {
+                echo 'Running automated model tests'
+
+                bat '.venv\\Scripts\\python -m pytest -v test_model.py'
             }
         }
     }
