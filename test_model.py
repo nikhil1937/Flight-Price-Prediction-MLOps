@@ -15,9 +15,7 @@ preprocessor = joblib.load("preprocessor.pkl")
 
 
 # Load original flight dataset
-df = pd.read_csv(
-    r"C:\Users\Ashish\Downloads\flights.csv"
-)
+df = pd.read_csv("test_data.csv")
 
 # Recreate date-related features
 df['date'] = pd.to_datetime(df['date'])
